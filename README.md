@@ -18,7 +18,7 @@ This project is a RESTful API for an e-commerce application. It provides endpoin
 ## Installation
 1. Clone the repository:
   ```bash
-  git clone https://github.com/Yurii9132/Ecomerce-app-rest-api.git
+  git clone https://github.com/Yurii9132/Ecommerce-app-rest-api.git
   ```
 2. Navigate to the project directory:
   ```bash
@@ -32,8 +32,8 @@ This project is a RESTful API for an e-commerce application. It provides endpoin
 ## Configuration
 1. Create a `.env` file in the root directory and add the following environment variables:
   ```env
-  PORT=5000
-  MONGO_URI=your_mongodb_connection_string
+  PORT=5432
+  POSTGRES_URI=your_mongodb_connection_string
   JWT_SECRET=your_jwt_secret
   ```
 
@@ -42,7 +42,7 @@ This project is a RESTful API for an e-commerce application. It provides endpoin
   ```bash
   npm start
   ```
-2. The API will be accessible at `http://localhost:5000`.
+2. The API will be accessible at `http://localhost:4001`.
 
 ## API Endpoints
 - **Authentication**
