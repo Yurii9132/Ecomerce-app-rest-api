@@ -1,36 +1,7 @@
 const bcrypt = require("bcrypt");
 const query = require("./index");
 
-const getProducts = (request, response) => {
-  query("SELECT * FROM products", (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
-    }
-    return response.status(200).json(result.rows);
-  });
-};
-
-const getProductById = (request, response) => {
-  const id = parseInt(request.params.id);
-
-  if (isNaN(id)) {
-    return response.status(400).json({ error: "Invalid product ID" });
-  }
-
-  query("SELECT * FROM products WHERE id = $1", [id], (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
-    }
-
-    if (result.rows.length === 0) {
-      return response.status(404).json({ error: "Product not found" });
-    }
-
-    return response.status(200).json(result.rows[0]);
-  });
-};
-
-const getUsers = (request, response) => {
+const getUsers = (request, response, next) => {
   query("SELECT * FROM users ORDER BY ID ASC", (error, result) => {
     if (error) {
       return response.status(400).json({ error: error.message });
@@ -39,7 +10,7 @@ const getUsers = (request, response) => {
   });
 };
 
-const getUserById = (request, response) => {
+const getUserById = (request, response, next) => {
   const id = parseInt(request.params.id);
 
   if (isNaN(id)) {
@@ -59,7 +30,7 @@ const getUserById = (request, response) => {
   });
 };
 
-const createUser = async (request, response) => {
+const createUser = async (request, response, next) => {
   const { username, email, password } = request.body;
 
   if (!username || !email || !password) {
@@ -87,7 +58,7 @@ const createUser = async (request, response) => {
   }
 };
 
-const updateUser = async (request, response) => {
+const updateUser = async (request, response, next) => {
   const id = parseInt(request.params.id);
   const { username, email, password } = request.body;
 
@@ -125,7 +96,7 @@ const updateUser = async (request, response) => {
   }
 };
 
-const deleteUser = (request, response) => {
+const deleteUser = (request, response, next) => {
   const id = parseInt(request.params.id);
 
   if (isNaN(id)) {
@@ -148,8 +119,6 @@ const deleteUser = (request, response) => {
 };
 
 module.exports = {
-  getProducts,
-  getProductById,
   getUsers,
   getUserById,
   createUser,
