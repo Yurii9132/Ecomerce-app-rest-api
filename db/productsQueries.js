@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const query = require("./index");
+const { query } = require("./index");
 
 const getProducts = (request, response, next) => {
   query("SELECT * FROM products", (error, result) => {
@@ -32,5 +32,5 @@ const getProductById = (request, response, next) => {
 
 module.exports = {
   getProducts,
-  getProductById
+  getProductById,
 };

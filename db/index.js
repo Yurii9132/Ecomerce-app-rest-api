@@ -1,16 +1,16 @@
-const pg = require("pg");
-const { Pool } = pg;
+const { Pool } = require("pg");
+require("dotenv").config();
 
 const pool = new Pool({
-  user: "me",
-  host: "localhost",
-  database: "electronic_devices",
-  password: "password",
-  port: 5432,
+  user: process.env.DB_USER, // Use values from .env
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 const query = (text, params, callback) => {
   return pool.query(text, params, callback);
 };
 
-module.exports = query;
+module.exports = { query, pool };

@@ -5,7 +5,7 @@ const {
   createUser,
   updateUser,
   deleteUser,
-} = require("./usersQueries");
+} = require("../db/usersQueries");
 const usersRouter = express.Router();
 
 usersRouter.get("/", getUsers);

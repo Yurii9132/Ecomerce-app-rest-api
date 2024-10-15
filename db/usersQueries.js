@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const query = require("./index");
+const { query } = require("./index");
 
 const getUsers = (request, response, next) => {
   query("SELECT * FROM users ORDER BY ID ASC", (error, result) => {
