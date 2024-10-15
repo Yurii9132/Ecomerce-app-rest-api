@@ -1,33 +1,38 @@
-const bcrypt = require("bcrypt");
 const { query } = require("./index");
+const AppError = require("../utils/AppError");
 
-const getProducts = (request, response, next) => {
-  query("SELECT * FROM products", (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
+const getProducts = async (request, response, next) => {
+  try {
+    const result = await query("SELECT * FROM products ORDER BY price DESC");
+
+    if (result.rows.length === 0) {
+      throw new AppError("No product found", 404);
     }
-    return response.status(200).json(result.rows);
-  });
+
+    response.status(200).json(result.rows);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getProductById = (request, response, next) => {
+const getProductById = async (request, response, next) => {
   const id = parseInt(request.params.id);
 
   if (isNaN(id)) {
-    return response.status(400).json({ error: "Invalid product ID" });
+    return next(new AppError("Invalid product ID", 400));
   }
 
-  query("SELECT * FROM products WHERE id = $1", [id], (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
-    }
-
+  try {
+    const result = await query("SELECT * FROM products WHERE id = $1", [id]);
     if (result.rows.length === 0) {
-      return response.status(404).json({ error: "Product not found" });
+      throw new AppError("Product not found", 404);
     }
 
-    return response.status(200).json(result.rows[0]);
-  });
+    response.status(200).json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+
 };
 
 module.exports = {

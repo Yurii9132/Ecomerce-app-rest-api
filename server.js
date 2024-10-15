@@ -44,6 +44,20 @@ app.use("/users", usersRouter);
 const productsRouter = require("./routes/productsRouter");
 app.use("/products", productsRouter);
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.isOperational ? err.message : "Internal server Error";
+
+  res.status(statusCode).json({
+    status: err.status || "error",
+    message,
+  });
+
+  console.error(err);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is listening on PORT ${PORT}`);
 });

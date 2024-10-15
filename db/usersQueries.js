@@ -1,60 +1,61 @@
 const bcrypt = require("bcrypt");
 const { query } = require("./index");
+const AppError = require("../utils/AppError");
 
-const getUsers = (request, response, next) => {
-  query("SELECT * FROM users ORDER BY ID ASC", (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
+const getUsers = async (request, response, next) => {
+  try {
+    const result = await query("SELECT * FROM users ORDER BY ID ASC");
+    if (result.rows.length === 0) {
+      throw new AppError("No user found", 404);
     }
-    return response.status(200).json(result.rows);
-  });
+
+    response.status(200).json(result.rows);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getUserById = (request, response, next) => {
+const getUserById = async (request, response, next) => {
   const id = parseInt(request.params.id);
 
   if (isNaN(id)) {
-    return response.status(400).json({ error: "Invalid user ID" });
+    return next(new AppError("Invalid user ID", 400));
   }
 
-  query("SELECT * FROM users WHERE id = $1", [id], (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: error.message });
-    }
+  try {
+    const result = await query("SELECT * FROM users WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
-      return response.status(404).json({ error: "Product not found" });
+      throw new AppError("User not found", 404);
     }
 
-    return response.status(200).json(result.rows[0]);
-  });
+    response.status(200).json(result.rows);
+  } catch (error) {
+    next(error);
+  }
 };
 
 const createUser = async (request, response, next) => {
   const { username, email, password } = request.body;
 
   if (!username || !email || !password) {
-    return response.status(400).json({ error: "Missing required fields" });
+    return next(new AppError("Missing required fields", 400));
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    query(
+    const result = query(
       "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [username, email, hashedPassword],
-      (error, result) => {
-        if (error) {
-          return response.status(400).json({ error: error.message });
-        }
-        return response.status(201).json({
-          message: `User added with ID: ${result.rows[0].id}`,
-          user: result.rows[0],
-        });
-      }
+      [username, email, hashedPassword]
     );
-  } catch (err) {
-    return response.status(500).json({ error: "Internal server error" });
+
+    response.status(201).json({
+      message: `User added with ID: ${result.rows[0].id}`,
+      user: result.rows[0],
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -63,59 +64,53 @@ const updateUser = async (request, response, next) => {
   const { username, email, password } = request.body;
 
   if (isNaN(id)) {
-    return response.status(400).json({ error: "Invalid user ID" });
+    return next(new AppError("Invalid user ID", 400));
   }
 
   if (!username || !email || !password) {
-    return response.status(400).json({ error: "Missing required fields" });
+    return next(new AppError("Missing required fields", 400));
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    query(
+    const result = query(
       "UPDATE users SET username = $1, email = $2, password = $3 WHERE id = $4 RETURNING *",
-      [username, email, hashedPassword, id],
-      (error, result) => {
-        if (error) {
-          return response.status(400).json({ error: error.message });
-        }
-
-        if (result.rowCount === 0) {
-          return response.status(404).json({ error: "User not found" });
-        }
-
-        return response.status(200).json({
-          message: `User modified with ID: ${id}`,
-          user: result.rows[0],
-        });
-      }
+      [username, email, hashedPassword, id]
     );
-  } catch (err) {
-    return response.status(500).json({ error: "Internal server error" });
+
+    if (result.rowCount === 0) {
+      throw new AppError("User not found", 404);
+    }
+
+    response.status(200).json({
+      message: `User modified with ID: ${id}`,
+      user: result.rows[0],
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const deleteUser = (request, response, next) => {
+const deleteUser = async (request, response, next) => {
   const id = parseInt(request.params.id);
 
   if (isNaN(id)) {
-    return response.status(400).json({ error: "Invalid user ID" });
+    return next(new AppError("Invalid user ID", 400));
   }
 
-  query("DELETE FROM users WHERE id = $1", [id], (error, result) => {
-    if (error) {
-      return response.status(400).json({ error: message });
-    }
-
+  try {
+    const result = await query("DELETE FROM users WHERE id = $1", [id]);
     if (result.rowCount === 0) {
-      return response.status(404).json({ error: "User not found" });
+      throw new AppError("User not found", 404);
     }
 
-    return response
-      .status(200)
-      .json({ message: `User deleted with ID: ${id}` });
-  });
+    response.status(200).json({
+      message: `User deleted with ID: ${id}`,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {

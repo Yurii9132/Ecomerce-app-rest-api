@@ -1,5 +1,6 @@
-const { Pool } = require("pg");
 require("dotenv").config();
+const { Pool } = require("pg");
+const AppError = require('../utils/AppError');
 
 const pool = new Pool({
   user: process.env.DB_USER, // Use values from .env
@@ -9,8 +10,14 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const query = (text, params, callback) => {
-  return pool.query(text, params, callback);
+const query = async (text, params) => {
+  try {
+    const res = await pool.query(text, params);
+    return res;
+  } catch (err) {
+    console.error("Database query error:", err);
+    throw new AppError("Database query failed", 500);
+  }
 };
 
 module.exports = { query, pool };
