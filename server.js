@@ -44,6 +44,9 @@ app.use("/users", usersRouter);
 const productsRouter = require("./routes/productsRouter");
 app.use("/products", productsRouter);
 
+const authRouter = require("./routes/authRouter");
+app.use("/login", authRouter);
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
